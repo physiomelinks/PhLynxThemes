@@ -5,7 +5,7 @@
       "schemaVersion": 1,
       "id": "domain-types",
       "name": "Domain types",
-      "description": "Compartment, membrane, process and protein, as used in the original PhLynx MVP.",
+      "description": "Compartment, membrane, process, and protein colouring theme.",
       "author": "PhLynx",
       "license": "CC0-1.0",
       "categories": [
