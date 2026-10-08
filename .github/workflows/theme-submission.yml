@@ -21,10 +21,10 @@ jobs:
       (github.event.action != 'labeled' || github.event.label.name == 'theme: submission')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
       - id: check
         # The issue body is untrusted: pass it through the environment, never interpolate it into the script.
         env:
@@ -50,10 +50,10 @@ jobs:
       github.event.action == 'labeled' && github.event.label.name == 'theme: accepted'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
       - id: theme
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
