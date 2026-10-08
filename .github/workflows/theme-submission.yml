@@ -1,0 +1,73 @@
+name: Theme submission
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: theme-submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # Validate on open/edit, and when a maintainer marks it for re-check.
+    if: >-
+      contains(github.event.issue.labels.*.name, 'theme: submission') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'theme: submission')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        # The issue body is untrusted: pass it through the environment, never interpolate it into the script.
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/submission.mjs check
+        continue-on-error: true
+      - name: Comment and label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          VALID: ${{ steps.check.outputs.valid }}
+        run: |
+          gh issue comment "$ISSUE" --body-file comment.md --edit-last --create-if-none
+          if [ "$VALID" = "true" ]; then
+            gh issue edit "$ISSUE" --add-label "theme: valid" --remove-label "theme: invalid" || true
+          else
+            gh issue edit "$ISSUE" --add-label "theme: invalid" --remove-label "theme: valid" || true
+          fi
+
+  accept:
+    # Only people with triage access can add labels, so this label is the maintainer's approval.
+    if: >-
+      github.event.action == 'labeled' && github.event.label.name == 'theme: accepted'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: theme
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/submission.mjs write && node scripts/build.mjs && rm comment.md
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: theme/${{ steps.theme.outputs.id }}
+          commit-message: "Add theme ${{ steps.theme.outputs.id }} (#${{ github.event.issue.number }})"
+          title: "Add theme: ${{ steps.theme.outputs.name }}"
+          body: |
+            Adds the theme proposed in #${{ github.event.issue.number }}.
+
+            Closes #${{ github.event.issue.number }}
+          labels: "theme: submission"
+          add-paths: |
+            themes/${{ steps.theme.outputs.id }}.json
+            dist/themes.json

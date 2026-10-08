@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "domain-types",
+  "name": "Domain types",
+  "description": "Compartment, membrane, process, and protein colouring theme.",
+  "author": "PhLynx",
+  "license": "CC0-1.0",
+  "categories": [
+    { "key": "compartment", "label": "Compartment", "color": "#ffe7e1", "dark": "#4a2c24" },
+    { "key": "membrane", "label": "Membrane", "color": "#ffe2ec", "dark": "#4a2333" },
+    { "key": "process", "label": "Process", "color": "#e1edff", "dark": "#22344f" },
+    { "key": "protein", "label": "Protein", "color": "#d1fff0", "dark": "#1d4a3c" }
+  ]
+}

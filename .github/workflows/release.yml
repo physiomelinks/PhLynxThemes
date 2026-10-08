@@ -1,0 +1,55 @@
+name: Release themes
+
+# On every change to main that touches themes/, rebuild dist/themes.json, tag the next v1.x.y and
+# purge jsDelivr. PhLynx fetches @1, which jsDelivr resolves to the newest v1 tag.
+on:
+  push:
+    branches: [main]
+    paths: ["themes/**", "scripts/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: node scripts/build.mjs
+      - name: Commit dist if it changed
+        run: |
+          if ! git diff --quiet -- dist/themes.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add dist/themes.json
+            git commit -m "Rebuild dist/themes.json"
+            git push
+          fi
+      - name: Tag next v1 patch release
+        id: tag
+        run: |
+          latest=$(git tag --list 'v1.*' --sort=-v:refname | head -n1)
+          if [ -n "$latest" ] && git diff --quiet "$latest" HEAD -- dist/themes.json; then
+            echo "dist/themes.json unchanged since $latest; nothing to release."
+            exit 0
+          fi
+          if [ -z "$latest" ]; then next=v1.0.0; else
+            IFS=. read -r major minor patch <<< "${latest#v}"
+            next="v$major.$minor.$((patch + 1))"
+          fi
+          git tag "$next" && git push origin "$next"
+          echo "tag=$next" >> "$GITHUB_OUTPUT"
+      - name: Purge jsDelivr cache
+        if: steps.tag.outputs.tag != ''
+        run: curl -fsS "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@1/dist/themes.json" || true

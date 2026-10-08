@@ -1,0 +1,42 @@
+name: Theme submission
+description: Propose a node colour theme for everyone using PhLynx.
+title: "Theme: "
+labels: ["theme: submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing a theme! The easiest way to fill this in is the **Propose for everyone** button
+        in PhLynx (Properties panel → My themes), which completes the JSON for you.
+
+        A check runs automatically and comments on this issue. If a maintainer accepts the theme, a pull
+        request adds it to `themes/` and it appears in PhLynx after the next release.
+  - type: input
+    id: theme-name
+    attributes:
+      label: Theme name
+      placeholder: Warm domains
+    validations:
+      required: true
+  - type: textarea
+    id: theme-json
+    attributes:
+      label: Theme JSON
+      description: Exported from PhLynx, or written by hand following schema/theme.schema.json.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: What the categories are for, where the colours come from, anything reviewers should know.
+    validations:
+      required: false
+  - type: checkboxes
+    id: licence
+    attributes:
+      label: Licence
+      options:
+        - label: I release this theme under CC0 1.0 (public domain), so anyone can use and adapt it.
+          required: true

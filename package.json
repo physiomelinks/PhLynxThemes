@@ -1,0 +1,15 @@
+{
+  "name": "PhLynx-Themes",
+  "private": true,
+  "description": "Shared node colour themes for PhLynx, served from jsDelivr.",
+  "type": "module",
+  "license": "CC0-1.0",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test scripts/lib.test.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
